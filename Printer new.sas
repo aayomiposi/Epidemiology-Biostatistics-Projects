@@ -8,12 +8,14 @@ dbms=xlsx replace;
 getnames=yes;
 sheet=Batch_1;
 run;
+
 Proc import out=Batch2
 datafile="C:\Users\aayom\OneDrive\Printers\Project_data_New"
 dbms=xlsx replace;
 getnames=yes;
 sheet=Batch_2;
 run;
+
 Proc import out=Batch3 
 datafile="C:\Users\aayom\OneDrive\Printers\Project_data_New"
 dbms=xlsx replace;
@@ -21,6 +23,7 @@ getnames=yes;
 sheet=Batch_3;
 range="A1:AT501";
 run;
+
 proc import out=Batch4
 datafile="C:\Users\aayom\OneDrive\Printers\Project_data_New"
 dbms=xlsx replace;
@@ -28,8 +31,11 @@ getnames=yes;
 sheet=Batch_4;
 range="A1:AT501";
 run;
+
 proc format library=Ani;
 	value TF 1="True" 2="False";
+	run;
+	
 *Rename variables in batch2;
 data Batch2A;
 length smoker $10 CA_type $80 A_type $470 device $1840 evidence_doctor $2340 features $120 evidence_test $2 job_title $110;
@@ -42,6 +48,7 @@ Coworkers=Coworkers2
 Metal_exposure=Metal_exposure2
 Hypersensitivity=Hypersensitivity2;
 run;
+
 *Rename variables in batch3;
 data Batch3A;
 length smoker $10 CA_type $80 A_type $470 device $1840 evidence_doctor $2340 features $120 evidence_test $2 job_title $110;
@@ -49,7 +56,8 @@ set Batch3;
 Rename O_metals=O_metals3;
 *hypersensitivity=hypersensitivity3*;
 run;
-*Rename variables in batch1;
+
+*Rename variables in batch1+*;
 data Batch1A;
 length smoker $10 CA_type $80 A_type $470 device $1840 evidence_doctor $2340 job_title $110;
 set Batch1;
@@ -59,6 +67,7 @@ dust_visible=dust_visible1
 proof=proof1
 Immune_test=Immune_test1*;
 run;
+
 *Rename variables in batch4;
 data Batch4A;
 length smoker $10 CA_type $80 A_type $470 device $1840 evidence_doctor $2340 features $120 evidence_test $2 job_title $110;
@@ -72,6 +81,7 @@ Coworkers=Coworkers4
 Metal_exposure=Metal_exposure4
 hypersensitivity=hypersensitivity4;
 run;
+
 *Merge datasets:4 batches=batch1A, batch2A, batch3A, batch4A*;
 data Ani.print;
 	set batch1A (in=batch1) batch2A (in=batch2) batch3A (in=batch3) batch4A (in=batch4);
@@ -81,7 +91,9 @@ data Ani.print;
 		else if batch3 then batch=3;
 		else if batch4 then batch=4;
 run;
+
 proc contents data=ani.print; run;
+
 *format values YN and Location*;
 proc format library=ani;
 value YN 1="true"
@@ -91,13 +103,15 @@ value YN 1="true"
   2="service technician"
   3="Job center";
  run;
+ 
 proc format library=ani;
 value smoke 1="Non-smoker"
 			2="Ex-smoker"
 			3="Smoker" 
 			9="Unknown";
 run;
-*Create array and label for health outcome variables;
+
+*Create array and label for health outcome variables*;
 data Ani.printer3;
 set Ani.print;
 array SYMC [29] Resp_tract Asthma_COPD skin gi_tract eyes liver MS_system neurological uro_genital hormonal CVS fatigue 
@@ -165,13 +179,17 @@ drop Resp_tract Asthma_COPD skin gi_tract eyes liver MS_system neurological uro_
                 CA leukemia tissue_sample other_health allergy nickel cobalt evidence_test O_metals Immune_test hypersensitivity 
 Metal_exposure;
 run;
+
 *frequency table for the variables*;
 proc freq data=Ani.printer3;
 tables Batch*(SYM_RT As_COPD SYM_Skin SYM_GT SYM_eyes SYM_liver SYM_MS SYM_neuro SYM_uro 
               SYM_Hor SYM_CVS SYM_fat SYM_CA SYM_leuk SYM_TS SYM_OH SYM_AL SYM_nic SYM_co SYM_OM 
 Loc_pol Loc_ST Loc_JC PR dust IT cowork M_expo hyper smok);
 run;
-proc freq data=Ani.printer3; tables smok; run;
+
+proc freq data=Ani.printer3; tables smok; 
+run;
+
 *Create yes and no format for device type and brand;
 proc format library=ani;
 value YNN 1="Yes"
